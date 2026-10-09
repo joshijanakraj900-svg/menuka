@@ -91,45 +91,26 @@
     }
     .primary-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 35px #ed6e9f66; }
 
-    /* MENUKA'S PHOTO FRAME */
+    /* HERO PHOTO — MIRROR FRAME REMOVED */
     .hero-photo-wrap {
-      position: relative; justify-self: center; width: min(100%, 365px); aspect-ratio: .79;
-      padding: 10px; border-radius: 190px 190px 30px 30px;
-      background: linear-gradient(145deg, #ffe1ed, #ff75ad, #a82e75, #f5d49a);
-      outline: 1px solid #ffe1ed88; outline-offset: 7px;
-      box-shadow: 0 0 30px #ff75ad66, 0 0 70px #d6337044;
-      animation: photoGlow 3s ease-in-out infinite alternate, rise 1.2s ease both,
+      position: relative;
+      justify-self: center;
+      width: min(100%, 365px);
+      aspect-ratio: .79;
+      animation: rise 1.2s ease both,
                  floatFrame 4.5s ease-in-out 1.2s infinite;
       will-change: transform;
     }
-    .hero-photo-wrap::before {
-      content: "♥"; position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
-      z-index: 5; font-size: 32px; color: #ffe1ed; text-shadow: 0 0 15px #ff4c96;
-      animation: heartbeat 1.7s infinite;
-    }
-    .hero-photo-wrap::after {
-      content: "✧  ♡  ✧"; position: absolute; bottom: -28px; left: 50%;
-      transform: translateX(-50%); white-space: nowrap; color: var(--gold);
-      font-size: 23px; letter-spacing: 8px; text-shadow: 0 0 15px #ff8db7;
+    .hero-photo-wrap::before,
+    .hero-photo-wrap::after,
+    .photo-heart,
+    .photo-caption {
+      display: none;
     }
     .hero-photo {
       width: 100%; height: 100%; object-fit: cover; object-position: center;
-      display: block; border-radius: 180px 180px 24px 24px;
-      border: 3px solid #fff0e9; background: #321326;
+      display: block; border-radius: 0; border: none; background: #321326;
     }
-    .photo-caption {
-      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
-      width: max-content; max-width: 90%; padding: 10px 20px; border-radius: 30px;
-      color: white; background: #240a20dd; backdrop-filter: blur(10px);
-      font-family: 'Dancing Script', cursive; font-size: 23px; text-align: center;
-    }
-    .photo-heart {
-      position: absolute; color: #ff9cbe; filter: drop-shadow(0 0 10px #ff4c96);
-      animation: heartbeat 1.7s infinite;
-    }
-    .heart-one { top: 12%; left: -24px; font-size: 40px; }
-    .heart-two { top: 35%; right: -24px; font-size: 47px; animation-delay: .4s; }
-    .heart-three { bottom: 12%; right: -13px; font-size: 30px; animation-delay: .8s; }
 
     /* COMMON SECTIONS */
     section { scroll-margin-top: 90px; }
@@ -275,7 +256,6 @@
     </div>
 
     <div class="hero-photo-wrap">
-      <!-- Hero portrait uses photos/6.jpeg -->
       <img
         src="photos/6.jpeg"
         alt="My beautiful Menuka"
@@ -297,7 +277,6 @@
         <span class="heart-divider" aria-hidden="true">♡ ── ♥ ── ♡</span>
       </div>
 
-      <!-- Add photos to the photos folder and update these file paths and captions. -->
       <div class="gallery">
         <div class="photo-card reveal">
           <img src="photos/1.jpeg" alt="A favorite memory" loading="lazy" onerror="this.style.opacity='.35'">
@@ -344,7 +323,6 @@
 
   <section class="section-light" id="letter">
     <div class="section-inner letter-section">
-      <!-- Love letter image uses photos/1.jpeg -->
       <img
         class="letter-image reveal"
         src="photos/1.jpeg"
@@ -419,7 +397,7 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
     Happy Birthday, My Love. <span>Always &amp; Forever ∞</span>
   </footer>
 
-  <!-- YouTube's player is kept off-screen. Playback starts automatically if allowed. -->
+  <!-- Background music player -->
   <div id="youtubePlayer" aria-label="Birthday background music" style="position:fixed;width:200px;height:113px;left:-300px;top:0;overflow:hidden"></div>
 
   <script>
@@ -429,6 +407,7 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
 
     /* FLOATING HEARTS */
     const heartContainer = document.getElementById("floating-hearts");
+
     function createHeart() {
       const heart = document.createElement("span");
       heart.className = "floating-heart";
@@ -454,6 +433,7 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
           }
         });
       }, { threshold: 0.12 });
+
       document.querySelectorAll(".reveal").forEach(element => revealObserver.observe(element));
     } else {
       document.querySelectorAll(".reveal").forEach(element => element.classList.add("visible"));
@@ -473,6 +453,7 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
         videoId: YOUTUBE_VIDEO_ID,
         playerVars: {
           autoplay: 1,
+          mute: 0,
           controls: 0,
           loop: 1,
           playlist: YOUTUBE_VIDEO_ID,
@@ -484,7 +465,9 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
             musicReady = true;
             musicButton.textContent = "♫ Play Music";
 
-            // Attempt automatic playback when the website opens.
+            /* Attempt automatic playback on every page load or refresh. */
+            birthdayPlayer.unMute();
+            birthdayPlayer.setVolume(80);
             birthdayPlayer.playVideo();
           },
           onStateChange: function (event) {
@@ -512,10 +495,12 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
         musicButton.textContent = "♫ Loading music…";
         return;
       }
+
       if (musicPlaying) {
         birthdayPlayer.pauseVideo();
       } else {
         birthdayPlayer.unMute();
+        birthdayPlayer.setVolume(80);
         birthdayPlayer.playVideo();
       }
     });
@@ -528,6 +513,7 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
     /* CONFETTI */
     function launchConfetti(amount = 100) {
       const colors = ["#ff8db7", "#f5d49a", "#ffffff", "#e94b89", "#d7a6ff"];
+
       for (let i = 0; i < amount; i++) {
         const piece = document.createElement("div");
         piece.className = "confetti";
@@ -544,6 +530,7 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
 
     /* BIRTHDAY CAKE */
     let wishMade = false;
+
     document.getElementById("wishButton").addEventListener("click", function () {
       const candles = document.querySelectorAll(".candle");
       const message = document.getElementById("cakeMessage");
@@ -553,6 +540,7 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
         candles.forEach(candle => candle.classList.add("blown"));
         message.textContent = "Menuka, may your sweetest wish come true! ✨❤️";
         button.textContent = "🎉 Light the Candles Again";
+
         if (!reducedMotion) launchConfetti(120);
         wishMade = true;
       } else {
@@ -566,11 +554,16 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
     /* FINAL SURPRISE */
     document.getElementById("finalButton").addEventListener("click", function () {
       const message = document.getElementById("finalMessage");
+
       message.textContent = "Menuka, you are my today, my tomorrow, and my favorite forever. I love you! 💖";
+
       if (!reducedMotion) {
         launchConfetti(150);
-        for (let i = 0; i < 20; i++) window.setTimeout(createHeart, i * 120);
+        for (let i = 0; i < 20; i++) {
+          window.setTimeout(createHeart, i * 120);
+        }
       }
+
       this.textContent = "Surprise delivered ❤️";
     });
 
