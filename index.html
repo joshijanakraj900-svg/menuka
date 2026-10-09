@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -274,13 +275,12 @@
     </div>
 
     <div class="hero-photo-wrap">
-      <!-- Replace this URL if you want to use a different main portrait. -->
+      <!-- Hero portrait uses photos/6.jpeg -->
       <img
-        src="https://drive.google.com/uc?export=view&id=1snmSvWbWJvvqxJik9_P9b9ZcGiPXuz6f"
+        src="photos/6.jpeg"
         alt="My beautiful Menuka"
         class="hero-photo"
         fetchpriority="high"
-        onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=900&q=85';this.alt='A romantic placeholder photo';"
       >
       <span class="photo-heart heart-one" aria-hidden="true">♥</span>
       <span class="photo-heart heart-two" aria-hidden="true">♡</span>
@@ -335,7 +335,6 @@
           <img src="photos/10.jpeg" alt="A favorite photograph" loading="lazy" onerror="this.style.opacity='.35'">
           <p>Always my love 🌹</p>
         </div>
-        
       </div>
       <p class="center" style="margin-top:35px;font-family:'Dancing Script',cursive;font-size:26px">
         More memories to make, more dreams to share... ♥
@@ -345,10 +344,11 @@
 
   <section class="section-light" id="letter">
     <div class="section-inner letter-section">
+      <!-- Love letter image uses photos/1.jpeg -->
       <img
         class="letter-image reveal"
-        src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1000&q=85"
-        alt="Beautiful flowers for Menuka"
+        src="photos/1.jpeg"
+        alt="A beautiful memory of Menuka"
         loading="lazy"
       >
       <div class="letter-paper reveal">
@@ -419,7 +419,7 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
     Happy Birthday, My Love. <span>Always &amp; Forever ∞</span>
   </footer>
 
-  <!-- YouTube's player is kept off-screen. Playback starts only after user interaction. -->
+  <!-- YouTube's player is kept off-screen. Playback starts automatically if allowed. -->
   <div id="youtubePlayer" aria-label="Birthday background music" style="position:fixed;width:200px;height:113px;left:-300px;top:0;overflow:hidden"></div>
 
   <script>
@@ -459,10 +459,7 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
       document.querySelectorAll(".reveal").forEach(element => element.classList.add("visible"));
     }
 
-    /* YOUTUBE MUSIC
-       YouTube may reject Shorts for embedded playback. If it does, use a regular
-       embeddable music video ID in the YOUTUBE_VIDEO_ID value below.
-    */
+    /* YOUTUBE MUSIC */
     const YOUTUBE_VIDEO_ID = "hjXFwPEQL2w";
     const musicButton = document.getElementById("musicButton");
     let birthdayPlayer = null;
@@ -475,13 +472,20 @@ Happy Birthday, my love. Today, tomorrow, and in all the beautiful days yet to c
         height: "113",
         videoId: YOUTUBE_VIDEO_ID,
         playerVars: {
-          autoplay: 0, controls: 0, loop: 1,
-          playlist: YOUTUBE_VIDEO_ID, playsinline: 1, rel: 0
+          autoplay: 1,
+          controls: 0,
+          loop: 1,
+          playlist: YOUTUBE_VIDEO_ID,
+          playsinline: 1,
+          rel: 0
         },
         events: {
           onReady: function () {
             musicReady = true;
             musicButton.textContent = "♫ Play Music";
+
+            // Attempt automatic playback when the website opens.
+            birthdayPlayer.playVideo();
           },
           onStateChange: function (event) {
             if (event.data === YT.PlayerState.PLAYING) {
