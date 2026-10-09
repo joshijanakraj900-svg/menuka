@@ -415,77 +415,149 @@ Happy Birthday to the soul I hope life is always kind to, even on the days I can
       document.querySelectorAll(".reveal").forEach(element => element.classList.add("visible"));
     }
 
-    /* YOUTUBE MUSIC */
-    const YOUTUBE_VIDEO_ID = "hjXFwPEQL2w";
-    const musicButton = document.getElementById("musicButton");
-    let birthdayPlayer = null;
-    let musicReady = false;
-    let musicPlaying = false;
+    
+/* YOUTUBE MUSIC — AUTOPLAY + USER-INTERACTION FALLBACK */
 
-    window.onYouTubeIframeAPIReady = function () {
-      birthdayPlayer = new YT.Player("youtubePlayer", {
-        width: "200",
-        height: "113",
-        videoId: YOUTUBE_VIDEO_ID,
-        playerVars: {
-          autoplay: 1,
-          mute: 0,
-          controls: 0,
-          loop: 1,
-          playlist: YOUTUBE_VIDEO_ID,
-          playsinline: 1,
-          rel: 0
-        },
-        events: {
-          onReady: function () {
-            musicReady = true;
-            musicButton.textContent = "♫ Play Music";
+const YOUTUBE_VIDEO_ID = "hjXFwPEQL2w";
+const musicButton = document.getElementById("musicButton");
 
-            /* Attempt automatic playback on every page load or refresh. */
-            birthdayPlayer.unMute();
-            birthdayPlayer.setVolume(80);
-            birthdayPlayer.playVideo();
-          },
-          onStateChange: function (event) {
-            if (event.data === YT.PlayerState.PLAYING) {
-              musicPlaying = true;
-              musicButton.textContent = "♫ Pause Music";
-              musicButton.setAttribute("aria-pressed", "true");
-            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
-              musicPlaying = false;
-              musicButton.textContent = "♫ Play Music";
-              musicButton.setAttribute("aria-pressed", "false");
-            }
-          },
-          onError: function () {
-            musicPlaying = false;
-            musicButton.textContent = "♫ Music unavailable";
-            musicButton.setAttribute("aria-pressed", "false");
-          }
+let birthdayPlayer = null;
+let musicReady = false;
+let musicPlaying = false;
+let soundEnabled = false;
+
+musicButton.textContent = "♫ Loading Music…";
+
+function enableBirthdayMusic() {
+  if (!musicReady || !birthdayPlayer || soundEnabled) return;
+
+  soundEnabled = true;
+
+  try {
+    birthdayPlayer.unMute();
+    birthdayPlayer.setVolume(80);
+    birthdayPlayer.playVideo();
+
+    musicButton.textContent = "♫ Pause Music";
+    musicButton.setAttribute("aria-pressed", "true");
+  } catch (error) {
+    console.warn("Music needs another user interaction.", error);
+  }
+}
+
+/* Start playback automatically, initially muted.
+   Browsers generally allow muted autoplay. */
+window.onYouTubeIframeAPIReady = function () {
+  birthdayPlayer = new YT.Player("youtubePlayer", {
+    width: "200",
+    height: "200",
+    videoId: YOUTUBE_VIDEO_ID,
+
+    playerVars: {
+      autoplay: 1,
+      controls: 0,
+      playsinline: 1,
+      rel: 0,
+      loop: 1,
+      playlist: YOUTUBE_VIDEO_ID,
+      mute: 1
+    },
+
+    events: {
+      onReady: function (event) {
+        musicReady = true;
+
+        event.target.mute();
+        event.target.setVolume(80);
+        event.target.playVideo();
+
+        musicButton.textContent = "♫ Enable Music";
+      },
+
+      onStateChange: function (event) {
+        if (event.data === YT.PlayerState.PLAYING) {
+          musicPlaying = true;
+          musicButton.textContent = soundEnabled
+            ? "♫ Pause Music"
+            : "♫ Enable Music";
+
+          musicButton.setAttribute(
+            "aria-pressed",
+            String(soundEnabled)
+          );
         }
-      });
-    };
 
-    musicButton.addEventListener("click", function () {
-      if (!musicReady || !birthdayPlayer) {
-        musicButton.textContent = "♫ Loading music…";
-        return;
+        if (
+          event.data === YT.PlayerState.PAUSED ||
+          event.data === YT.PlayerState.ENDED
+        ) {
+          musicPlaying = false;
+          musicButton.textContent = "♫ Play Music";
+          musicButton.setAttribute("aria-pressed", "false");
+        }
+
+        if (event.data === YT.PlayerState.BUFFERING) {
+          musicButton.textContent = "♫ Loading Music…";
+        }
+      },
+
+      onError: function () {
+        musicPlaying = false;
+        musicButton.textContent = "♫ Music Unavailable";
+        musicButton.setAttribute("aria-pressed", "false");
       }
+    }
+  });
+};
 
-      if (musicPlaying) {
-        birthdayPlayer.pauseVideo();
-      } else {
-        birthdayPlayer.unMute();
-        birthdayPlayer.setVolume(80);
-        birthdayPlayer.playVideo();
-      }
-    });
+/* The visitor's first interaction enables audible playback.
+   This is the fallback for browsers that block sound autoplay. */
+function firstInteraction() {
+  enableBirthdayMusic();
 
-    const youtubeScript = document.createElement("script");
-    youtubeScript.src = "https://www.youtube.com/iframe_api";
-    youtubeScript.async = true;
-    document.head.appendChild(youtubeScript);
+  if (soundEnabled) {
+    document.removeEventListener("pointerdown", firstInteraction);
+    document.removeEventListener("keydown", firstInteraction);
+    document.removeEventListener("touchstart", firstInteraction);
+  }
+}
 
+document.addEventListener("pointerdown", firstInteraction);
+document.addEventListener("keydown", firstInteraction);
+document.addEventListener("touchstart", firstInteraction, {
+  passive: true
+});
+
+/* Music button: enable, pause, or resume */
+musicButton.addEventListener("click", function () {
+  if (!musicReady || !birthdayPlayer) {
+    musicButton.textContent = "♫ Loading Music…";
+    return;
+  }
+
+  if (!soundEnabled) {
+    enableBirthdayMusic();
+    return;
+  }
+
+  if (musicPlaying) {
+    birthdayPlayer.pauseVideo();
+  } else {
+    birthdayPlayer.unMute();
+    birthdayPlayer.setVolume(80);
+    birthdayPlayer.playVideo();
+  }
+});
+
+/* Load the YouTube player API only once */
+if (!document.querySelector(
+  'script[src="https://www.youtube.com/iframe_api"]'
+)) {
+  const youtubeScript = document.createElement("script");
+  youtubeScript.src = "https://www.youtube.com/iframe_api";
+  youtubeScript.async = true;
+  document.head.appendChild(youtubeScript);
+}
     /* CONFETTI */
     function launchConfetti(amount = 100) {
       const colors = ["#ff8db7", "#f5d49a", "#ffffff", "#e94b89", "#d7a6ff"];
